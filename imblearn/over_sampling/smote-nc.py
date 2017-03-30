@@ -10,6 +10,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.utils import check_array, check_random_state
 
 from imblearn.base import BaseBinarySampler
+from imblearn.over_sampling import SMOTE
 from imblearn.utils import check_neighbors_object
 
 SMOTE_KIND = ('regular', 'borderline1', 'borderline2', 'svm')
@@ -35,7 +36,8 @@ def smote_nc_dist(u, v, categorical_features):
     continuous_features = np.setdiff1d(range(0, len(u)), categorical_features)
 
     # Get standard deviation for continuous values
-    med = np.median(np.std([u[continuous_features], v[categorical_features]], axis=0))
+    stds = np.std([u[continuous_features], v[continuous_features]], axis=0)
+    med = np.median(stds)
     med_c = med ** 2
 
     # compute continuous distance
@@ -213,8 +215,15 @@ class SMOTENC(BaseBinarySampler):
             # Construct synthetic sample for the nominal part
             # The generated nominal features are the result of a majority
             # vote among the k nearest neighbors (the mode along each feature)
-            X_new[i, self.categorical_features] = stats.mode(nn_data[nn_num[row],
-                                                                     self.categorical_features])[0]
+
+            # Mesh to select subarray composed of nearest neighbors with
+            # their categorical features
+            mesh = np.ix_(nn_num[row], self.categorical_features)
+
+            # Compute modes
+            modes = stats.mode(nn_data[mesh])[0][0]
+
+            X_new[i, self.categorical_features] = modes
 
         # The returned target vector is simple a repetition of the
         # minority label
@@ -230,9 +239,11 @@ class SMOTENC(BaseBinarySampler):
         # variations we must first find samples that are in danger, we
         # intialize the NN object differently depending on the method chosen
 
-        # In case k_nieghbors is an int need to initialize smote-nc distance measure
+        # In case k_neighbors is an int need to initialize smote-nc distance measure
         if isinstance(self.k_neighbors, int):
-            self.k_neighbors = NearestNeighbors(n_neighbors=self.k_neighbors,
+            # Add an additional neighbor as the sample is considered as
+            # the closest neighbor and we wan k_neighbors distinct from sample
+            self.k_neighbors = NearestNeighbors(n_neighbors=self.k_neighbors + 1,
                                                 metric=smote_nc_dist,
                                                 metric_params={'categorical_features': self.categorical_features})
 
@@ -311,7 +322,7 @@ class SMOTENC(BaseBinarySampler):
 
                 # Matrix with k-th nearest neighbors indexes for each minority
                 # element.
-                nns = self.nn_k_.kneighbors(X_min, return_distance=False)[:, 0:]
+                nns = self.nn_k_.kneighbors(X_min, return_distance=False)[:, 1:]
 
                 self.logger.debug('Create synthetic samples ...')
 
