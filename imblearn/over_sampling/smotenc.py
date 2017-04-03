@@ -158,7 +158,7 @@ class SMOTENC(BaseBinarySampler):
             # Samples are in danger for m/2 <= m' < m (if m' = m it is not border but noise)
             return np.bitwise_and(
                 n_maj >= float(self.nn_m_.n_neighbors - 1) / 2.,
-                n_maj < self.nn_m_.neighbors - 1
+                n_maj < self.nn_m_.n_neighbors - 1
             )
         elif kind == 'noise':
             # Samples are noise for m = m'
