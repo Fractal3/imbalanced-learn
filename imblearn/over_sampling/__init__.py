@@ -6,6 +6,7 @@ perform over-sampling.
 from .random_over_sampler import RandomOverSampler
 from .smote import SMOTE
 from .adasyn import ADASYN
+<<<<<<< HEAD
 from .smotenc import SMOTENC
 
 __all__ = ['RandomOverSampler', 'SMOTE', 'ADASYN', 'SMOTENC']
