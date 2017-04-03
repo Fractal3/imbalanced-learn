@@ -112,12 +112,14 @@ class SMOTENC(BaseBinarySampler):
                  ratio='auto',
                  random_state=None,
                  k_neighbors=5,
+                 m_neighbors=10,
                  kind='regular',
                  n_jobs=1):
         super(SMOTENC, self).__init__(ratio=ratio, random_state=random_state)
         self.categorical_features = categorical_features
         self.kind = kind
         self.k_neighbors = k_neighbors
+        self.m_neighbors = m_neighbors
         self.n_jobs = n_jobs
 
     def _in_danger_noise(self, samples, y, kind='danger'):
