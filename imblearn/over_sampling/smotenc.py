@@ -1,6 +1,6 @@
 ﻿"""Class to perform over-sampling using SMOTE-NC."""
 
-# Authors: Christophe Rannou (rannou.christophe.22@gmail.com
+# Authors: Christophe Rannou (rannou.christophe.22@gmail.com)
 
 from __future__ import division, print_function
 
